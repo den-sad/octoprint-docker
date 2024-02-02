@@ -55,7 +55,7 @@ RUN s6tar=$(find /tmp -name "s6-overlay-*.tar.gz") \
 # Install octoprint
 RUN	curl -fsSLO --compressed --retry 3 --retry-delay 10 \
   https://github.com/OctoPrint/OctoPrint/archive/${octoprint_ref}.tar.gz \
-	&& mkdir -p /opt/octoprint \
+  && mkdir -p /opt/octoprint \
   && tar xzf ${octoprint_ref}.tar.gz --strip-components 1 -C /opt/octoprint --no-same-owner
 
 WORKDIR /opt/octoprint
@@ -72,6 +72,13 @@ RUN curl -fsSLO --compressed --retry 3 --retry-delay 10 \
 WORKDIR /mjpg/mjpg-streamer-master/mjpg-streamer-experimental
 RUN make
 RUN make install
+
+# install libgpiod
+WORKDIR /opt/octoprint
+RUN git clone https://github.com/devdotnetorg/docker-libgpiod.git && \
+  cd docker-libgpiod && chmod +x setup-libgpiod.sh && \
+  ./setup-libgpiod.sh 1.6.3 /usr/share/libgpiod
+RUN rm -rf docker-libgpiod
 
 # Copy services into s6 servicedir and set default ENV vars
 COPY root /
